@@ -24,7 +24,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdint.h>
 
+#include <sbus.h>
+#include <servo.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,7 +51,9 @@ TIM_HandleTypeDef htim3;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-
+uint8_t gSBUSByte;
+struct sbusframe_user gSBUSFrame;
+uint32_t Err;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -62,6 +67,25 @@ static void MX_USART1_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if (huart == &huart1)
+	{
+		// Add received byte to sbus FIFO
+		SBUS_AddByte(gSBUSByte);
+
+		// Available sbus frame ?
+		if (SBUS_GetFrame(&gSBUSFrame) == 0)
+		{
+			// TODO Channel decoding
+		}
+
+		// Restart IT
+		HAL_UART_Receive_IT(huart, &gSBUSByte, 1);
+	}
+
+}
 
 /* USER CODE END 0 */
 
@@ -82,7 +106,8 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  SBUS_Init();
+  SERVO_Init(&htim3, TIM_CHANNEL_1);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -99,6 +124,9 @@ int main(void)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
 
+  // Start SBUS ISR
+  HAL_UART_Receive_IT(&huart1, &gSBUSByte, 1);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -108,6 +136,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  // Blink LED
+	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	  HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
@@ -231,10 +262,10 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.BaudRate = 100000;
+  huart1.Init.WordLength = UART_WORDLENGTH_9B;
+  huart1.Init.StopBits = UART_STOPBITS_2;
+  huart1.Init.Parity = UART_PARITY_EVEN;
   huart1.Init.Mode = UART_MODE_RX;
   huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;
