@@ -16,7 +16,7 @@
 #define SERVO_THRESHOLD_DEFAULT	1500UL
 #define SERVO_THRESHOLD_MAX		2000UL
 
-uint32_t servo_init(TIM_HandleTypeDef *pTimer, uint32_t Channel)
+uint32_t SERVO_Init(TIM_HandleTypeDef *pTimer, uint32_t Channel)
 {
 	if (NULL == pTimer)
 		return 1;
@@ -47,7 +47,7 @@ uint32_t servo_init(TIM_HandleTypeDef *pTimer, uint32_t Channel)
 }
 
 
-uint32_t servo_set_position(TIM_HandleTypeDef *pTimer, uint32_t Channel, int8_t Position)
+uint32_t SERVO_SetPosition(TIM_HandleTypeDef *pTimer, uint32_t Channel, int16_t Position)
 {
 	uint16_t Threshold = 0;
 
@@ -61,7 +61,7 @@ uint32_t servo_set_position(TIM_HandleTypeDef *pTimer, uint32_t Channel, int8_t 
 		Position = SERVO_POSITION_MAX;
 
 	// Compute PWM threshold
-	Threshold = (Position + 100) * 5 + SERVO_THRESHOLD_MIN;
+	Threshold = ((Position + 1000) / 2) + SERVO_THRESHOLD_MIN;
 
 	// Set PWM threshold
 	switch(Channel)

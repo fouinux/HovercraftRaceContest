@@ -10,10 +10,10 @@
 
 #include "stm32f1xx_hal.h"
 
-#define SERVO_POSITION_MIN	(-100)
-#define SERVO_POSITION_MAX	(+100)
+#define SERVO_POSITION_MIN	(-1000)
+#define SERVO_POSITION_MAX	(+1000)
 
-uint32_t servo_init(TIM_HandleTypeDef *pTimer, uint32_t Channel);
-uint32_t servo_set_position(TIM_HandleTypeDef *pTimer, uint32_t Channel, int8_t Position);
+uint32_t SERVO_Init(TIM_HandleTypeDef *pTimer, uint32_t Channel);
+uint32_t SERVO_SetPosition(TIM_HandleTypeDef *pTimer, uint32_t Channel, int16_t Position);
 
 #endif /* SERVO_H_ */
