@@ -23,7 +23,9 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
+#include <string.h>
 
+#include <servo.h>
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -32,7 +34,7 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
+extern TIM_HandleTypeDef htim3;
 /* USER CODE END PV */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
@@ -263,8 +265,31 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
+	  char aStr[32] = "";
+	  static int16_t Position = 0;
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+
+  // Debug
+  if (strncmp((char *)Buf, "+", 1) == 0)
+  {
+	  Position += 100;
+	  sprintf(aStr, "Servo: %d\r\n", Position);
+	  SERVO_SetPosition(&htim3, TIM_CHANNEL_1, Position);
+  }
+  else if (strncmp((char *)Buf, "-", 1) == 0)
+  {
+	  Position -= 100;
+	  sprintf(aStr, "Servo: %d\r\n", Position);
+	  SERVO_SetPosition(&htim3, TIM_CHANNEL_1, Position);
+  }
+  else
+  {
+	  sprintf(aStr, "Unknown\r\n");
+  }
+
+  CDC_Transmit_FS((uint8_t *) aStr, strlen(aStr));
+
   return (USBD_OK);
   /* USER CODE END 6 */
 }

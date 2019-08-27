@@ -12,9 +12,12 @@
 
 #include "stm32f1xx_hal.h"
 
-#define SERVO_THRESHOLD_MIN		1000UL
+#define SERVO_THRESHOLD_MIN		500UL
 #define SERVO_THRESHOLD_DEFAULT	1500UL
-#define SERVO_THRESHOLD_MAX		2000UL
+#define SERVO_THRESHOLD_MAX		2500UL
+
+#define SERVO_SCALE_A ((SERVO_THRESHOLD_MAX - SERVO_THRESHOLD_MIN) / (SERVO_POSITION_MAX - SERVO_POSITION_MIN))
+#define SERVO_SCALE_B (SERVO_THRESHOLD_MAX - (SERVO_SCALE_A * SERVO_POSITION_MAX))
 
 uint32_t SERVO_Init(TIM_HandleTypeDef *pTimer, uint32_t Channel)
 {
@@ -61,7 +64,7 @@ uint32_t SERVO_SetPosition(TIM_HandleTypeDef *pTimer, uint32_t Channel, int16_t 
 		Position = SERVO_POSITION_MAX;
 
 	// Compute PWM threshold
-	Threshold = ((Position + 1000) / 2) + SERVO_THRESHOLD_MIN;
+	Threshold = SERVO_SCALE_A * Position + SERVO_SCALE_B;
 
 	// Set PWM threshold
 	switch(Channel)
