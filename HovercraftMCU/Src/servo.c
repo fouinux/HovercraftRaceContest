@@ -7,17 +7,18 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <math.h>
 
 #include <servo.h>
 
 #include "stm32f1xx_hal.h"
 
 #define SERVO_THRESHOLD_MIN		500UL
-#define SERVO_THRESHOLD_DEFAULT	1500UL
 #define SERVO_THRESHOLD_MAX		2500UL
+#define SERVO_THRESHOLD_DEFAULT	1500UL
 
-#define SERVO_SCALE_A ((SERVO_THRESHOLD_MAX - SERVO_THRESHOLD_MIN) / (SERVO_POSITION_MAX - SERVO_POSITION_MIN))
-#define SERVO_SCALE_B (SERVO_THRESHOLD_MAX - (SERVO_SCALE_A * SERVO_POSITION_MAX))
+float gServoScaleA = 1;
+float gServoScaleB = 0;
 
 uint32_t SERVO_Init(TIM_HandleTypeDef *pTimer, uint32_t Channel)
 {
@@ -43,6 +44,10 @@ uint32_t SERVO_Init(TIM_HandleTypeDef *pTimer, uint32_t Channel)
 		return 1;
 	}
 
+	// Compute scale A and B
+	gServoScaleA = ((float) (SERVO_THRESHOLD_MAX - SERVO_THRESHOLD_MIN) /  (float) (SERVO_POSITION_MAX - SERVO_POSITION_MIN));
+	gServoScaleB = ((float) SERVO_THRESHOLD_MAX - (gServoScaleA * (float) SERVO_POSITION_MAX));
+
 	// Start PWM
 	HAL_TIM_PWM_Start(pTimer, Channel);
 
@@ -63,8 +68,10 @@ uint32_t SERVO_SetPosition(TIM_HandleTypeDef *pTimer, uint32_t Channel, int16_t 
 	if (Position > SERVO_POSITION_MAX)
 		Position = SERVO_POSITION_MAX;
 
-	// Compute PWM threshold
-	Threshold = SERVO_SCALE_A * Position + SERVO_SCALE_B;
+	// Compute PWM threshold (y = ax + b)
+	//Threshold = (uint16_t) roundf(gServoScaleA * Position + gServoScaleB);
+	// TODO Remove super optimisation
+	Threshold = Position + 1500;
 
 	// Set PWM threshold
 	switch(Channel)

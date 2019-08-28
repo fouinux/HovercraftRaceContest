@@ -62,6 +62,22 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define LED_Pin GPIO_PIN_13
 #define LED_GPIO_Port GPIOC
+#define Motor_1_Pin GPIO_PIN_0
+#define Motor_1_GPIO_Port GPIOA
+#define Motor_2_Pin GPIO_PIN_1
+#define Motor_2_GPIO_Port GPIOA
+#define Motor_3_Pin GPIO_PIN_2
+#define Motor_3_GPIO_Port GPIOA
+#define Motor_4_Pin GPIO_PIN_3
+#define Motor_4_GPIO_Port GPIOA
+#define Servo_1_Pin GPIO_PIN_6
+#define Servo_1_GPIO_Port GPIOA
+#define Servo_2_Pin GPIO_PIN_7
+#define Servo_2_GPIO_Port GPIOA
+#define Servo_3_Pin GPIO_PIN_0
+#define Servo_3_GPIO_Port GPIOB
+#define Servo_4_Pin GPIO_PIN_1
+#define Servo_4_GPIO_Port GPIOB
 #define SBUS_Pin GPIO_PIN_9
 #define SBUS_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
