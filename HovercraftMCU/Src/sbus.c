@@ -11,6 +11,8 @@
 
 #include <sbus.h>
 
+#include "usbd_cdc_if.h"
+
 #define SBUS_HEADER 0x0F
 #define SBUS_FOOTER 0x00
 
@@ -74,6 +76,31 @@ uint32_t SBUS_GetFrame(struct sbusframe_user *pFrame)
 			memcpy(&gBufferedFrame[0], &gFIFO[gFIFOIndex], SBUS_FRAME_SIZE - gFIFOIndex);
 			memcpy(&gBufferedFrame[SBUS_FRAME_SIZE - gFIFOIndex], &gFIFO[0], gFIFOIndex);
 
+			// Debug SBUS
+//			char Str[128];
+//			sprintf(Str, "%03X:%03X:%03X:%03X:%03X:%03X:%03X:%03X:%03X:%03X:%03X:%03X:%03X:%03X:%03X:%03X:%01X:%01X:%01X:%01X\r\n",
+//					pSBUSFrame->Channel_1,
+//					pSBUSFrame->Channel_2,
+//					pSBUSFrame->Channel_3,
+//					pSBUSFrame->Channel_4,
+//					pSBUSFrame->Channel_5,
+//					pSBUSFrame->Channel_6,
+//					pSBUSFrame->Channel_7,
+//					pSBUSFrame->Channel_8,
+//					pSBUSFrame->Channel_9,
+//					pSBUSFrame->Channel_10,
+//					pSBUSFrame->Channel_11,
+//					pSBUSFrame->Channel_12,
+//					pSBUSFrame->Channel_13,
+//					pSBUSFrame->Channel_14,
+//					pSBUSFrame->Channel_15,
+//					pSBUSFrame->Channel_16,
+//					pSBUSFrame->Channel_17,
+//					pSBUSFrame->Channel_18,
+//					pSBUSFrame->FailSafe,
+//					pSBUSFrame->FrameLost);
+//			CDC_Transmit_FS((uint8_t *)Str, strlen(Str));
+
 			// Check for error
 			if (pSBUSFrame->FailSafe || pSBUSFrame->FrameLost || pSBUSFrame->Zero)
 				return 1;
@@ -103,4 +130,16 @@ uint32_t SBUS_GetFrame(struct sbusframe_user *pFrame)
 	}
 
 	return 0;
+}
+
+#define SBUS_CHANNEL_VALUE_MIN	172
+#define SBUS_CHANNEL_VALUE_MAX	1811
+
+int32_t SBUS_NormalizeChannel(uint16_t ChannelValue, int32_t Min, int32_t Max)
+{
+	int32_t ScaleA = Max - Min;
+	int32_t ScaleB = (Min * SBUS_CHANNEL_VALUE_MAX) - (Max * SBUS_CHANNEL_VALUE_MIN);
+	int32_t ScaleD = SBUS_CHANNEL_VALUE_MAX - SBUS_CHANNEL_VALUE_MIN;
+
+	return ((int32_t) ChannelValue * ScaleA + ScaleB) / ScaleD;
 }

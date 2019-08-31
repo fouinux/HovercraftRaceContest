@@ -43,7 +43,7 @@ uint32_t MOTOR_Init(TIM_HandleTypeDef *pTimer, uint32_t Channel)
 	return 0;
 }
 
-uint32_t MOTOR_SetSpeed(TIM_HandleTypeDef *pTimer, uint32_t ChannelA, uint32_t ChannelB, uint16_t Speed)
+uint32_t MOTOR_SetSpeed(TIM_HandleTypeDef *pTimer, uint32_t ChannelA, uint32_t ChannelB, int16_t Speed)
 {
 	if (NULL == pTimer)
 			return 1;

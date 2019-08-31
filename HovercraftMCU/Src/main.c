@@ -26,6 +26,8 @@
 /* USER CODE BEGIN Includes */
 #include <stdint.h>
 
+#include "usbd_cdc_if.h"
+
 #include <sbus.h>
 #include <servo.h>
 /* USER CODE END Includes */
@@ -70,6 +72,9 @@ static void MX_TIM2_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+#define CHANNEL_MIN	172
+#define CHANNEL_MAX
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if (huart == &huart1)
@@ -80,7 +85,19 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		// Available sbus frame ?
 		if (SBUS_GetFrame(&gSBUSFrame) == 0)
 		{
-			// TODO Channel decoding
+			// Set Servo positon
+			int16_t ServoPosition = SBUS_NormalizeChannel(gSBUSFrame.Channels[1], -1000, 1000);
+			SERVO_SetPosition(&htim3, TIM_CHANNEL_1, ServoPosition);
+
+			// Debug
+//			char Str[64];
+//			sprintf(Str, "%d %d %d %d %d\r\n",
+//					gSBUSFrame.Channels[0],
+//					gSBUSFrame.Channels[1],
+//					gSBUSFrame.Channels[2],
+//					gSBUSFrame.Channels[3],
+//					gSBUSFrame.Channels[4]);
+//			CDC_Transmit_FS((uint8_t *)Str, strlen(Str));
 		}
 
 		// Restart IT
@@ -140,7 +157,8 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	  // Blink LED
 	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-	  HAL_Delay(100);
+	  HAL_Delay(500);
+
   }
   /* USER CODE END 3 */
 }

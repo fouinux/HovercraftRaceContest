@@ -45,6 +45,7 @@ struct sbusframe_user
 uint32_t SBUS_Init(void);
 uint32_t SBUS_AddByte(uint8_t Byte);
 uint32_t SBUS_GetFrame(struct sbusframe_user *pFrame);
+int32_t SBUS_NormalizeChannel(uint16_t ChannelValue, int32_t Min, int32_t Max);
 
 
 #endif /* SBUS_H_ */
