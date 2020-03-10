@@ -1,0 +1,5 @@
+sbus.c:24:10:SBUS_Init	8	static
+sbus.c:34:10:SBUS_AddByte	0	static
+sbus.c:43:10:SBUS_GetChannel	16	static
+sbus.c:106:9:SBUS_NormalizeChannel	8	static
+sbus.c:115:6:SBUS_TimeoutCallback	0	static

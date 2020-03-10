@@ -1,0 +1,4 @@
+sbus.c:27:10:SBUS_Init	8	static
+sbus.c:41:10:SBUS_AddByte	16	static
+sbus.c:56:10:SBUS_GetFrame	312	static
+sbus.c:138:9:SBUS_NormalizeChannel	48	static
