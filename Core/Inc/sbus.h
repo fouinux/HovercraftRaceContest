@@ -1,8 +1,8 @@
 /*
  * sbus.h
  *
- *  Created on: 27 august 2019
- *      Author: gfouille
+ *  Created on: March 10, 2020
+ *      Author: fouinux
  */
 
 #ifndef SBUS_H_

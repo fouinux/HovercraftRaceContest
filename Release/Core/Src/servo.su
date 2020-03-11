@@ -1,0 +1,2 @@
+servo.c:24:10:SERVO_Init	8	static
+servo.c:60:10:SERVO_SetPosition	16	static
