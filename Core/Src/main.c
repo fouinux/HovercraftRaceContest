@@ -28,7 +28,6 @@
 #include "usbd_cdc_if.h"
 
 #include <sbus.h>
-#include <servo.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -100,31 +99,41 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		// Available sbus frame ?
 		if (SBUS_GetChannel(&gSBUSChannels) == FRAME_COMPLETE)
 		{
-			// Set Servo positon
-			/*int16_t ServoPosition = SBUS_NormalizeChannel(gSBUSFrame.Channels[1], -1000, 1000);
-			SERVO_SetPosition(&htim3, TIM_CHANNEL_1, ServoPosition);*/
+			if (gSBUSChannels.Channel_5 > 1000UL)
+			{
+				// Set Lifter speed
+				int16_t LifterSpeed = SBUS_NormalizeChannel(gSBUSChannels.Channel_4, 0, 1000);
+				htim2.Instance->CCR1 = LifterSpeed;
 
-			// Set Lifter speed
-			int16_t LifterSpeed = SBUS_NormalizeChannel(gSBUSChannels.Channel_4, 0, 1000);
-			htim2.Instance->CCR1 = LifterSpeed;
+				// Set Thruster speed
+				int16_t ThrusterSpeed = SBUS_NormalizeChannel(gSBUSChannels.Channel_0, 0, 1000);
+				htim2.Instance->CCR2 = ThrusterSpeed;
 
-			// Set Thruster speed
-			int16_t ThrusterSpeed = SBUS_NormalizeChannel(gSBUSChannels.Channel_0, 0, 1000);
-			htim2.Instance->CCR2 = ThrusterSpeed;
-
-			// Set servo position
-			uint16_t ServoPosition = SBUS_NormalizeChannel(gSBUSChannels.Channel_1, 1000, 2000);
-			htim3.Instance->CCR2 = ServoPosition;
+				// Set servo position
+				uint16_t ServoPosition = SBUS_NormalizeChannel(gSBUSChannels.Channel_1, 500, 2500);
+				htim3.Instance->CCR4 = ServoPosition;
+			}
+			else
+			{
+				// Stops motors
+				htim2.Instance->CCR1 = 0;
+				htim2.Instance->CCR2 = 0;
+			}
 
 			// Debug
-			char Str[64];
-			sprintf(Str, "%d %d %d %d %d\r\n",
-					gSBUSChannels.Channel_0,
-					gSBUSChannels.Channel_1,
-					gSBUSChannels.Channel_2,
-					gSBUSChannels.Channel_3,
-					gSBUSChannels.Channel_4);
-			CDC_Transmit_FS((uint8_t *)Str, strlen(Str));
+//			char Str[64];
+//			sprintf(Str, "%d %d %d %d %d %d\r\n",
+//					gSBUSChannels.Channel_0,
+//					gSBUSChannels.Channel_1,
+//					gSBUSChannels.Channel_2,
+//					gSBUSChannels.Channel_3,
+//					gSBUSChannels.Channel_4,
+//					gSBUSChannels.Channel_5);
+//			CDC_Transmit_FS((uint8_t *)Str, strlen(Str));
+
+//			char Str[64];
+//			sprintf(Str, "%d %d %d\r\n", LifterSpeed, ThrusterSpeed, ServoPosition);
+//			CDC_Transmit_FS((uint8_t *)Str, strlen(Str));
 
 			//HAL_GPIO_TogglePin(Led_GPIO_Port, Led_Pin);
 		}
@@ -187,8 +196,9 @@ int main(void)
 	HAL_TIM_Base_Start_IT(&htim14);
 
 	// Start PWM
-	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1 | TIM_CHANNEL_2);
-	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -335,7 +345,7 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 47;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 1000;
+  htim3.Init.Period = 20000;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -365,6 +375,7 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
   {
     Error_Handler();
